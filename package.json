@@ -1,0 +1,36 @@
+{
+  "name": "plataforma-impacto-ambiental-api",
+  "version": "1.0.0",
+  "description": "API REST de la Plataforma Digital Integral para la Gestión de Proyectos de Impacto Ambiental (SENA - GA7-220501096-AA5-EV03)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node database/seed.js",
+    "probar": "node pruebas/probarApi.js"
+  },
+  "keywords": [
+    "api",
+    "rest",
+    "express",
+    "mysql",
+    "impacto-ambiental",
+    "sena"
+  ],
+  "author": "Roycer Cervantes y Sebastián Rodríguez",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.11.5",
+    "swagger-ui-express": "^5.0.1",
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
