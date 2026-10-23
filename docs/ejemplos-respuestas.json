@@ -1,0 +1,1748 @@
+{
+  "salud": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/salud",
+      "conToken": false,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "API Plataforma de Gestión de Proyectos de Impacto Ambiental",
+        "version": "1.0.0",
+        "baseDatos": "conectada",
+        "fecha": "2026-10-23T03:44:07.104Z"
+      }
+    }
+  },
+  "registro_ok": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/auth/registro",
+      "conToken": false,
+      "cuerpo": {
+        "nombre": "Laura Mendoza",
+        "correo": "laura.mendoza.1792727047113@correo.com",
+        "password": "Manglar2026",
+        "rol": "gestor"
+      }
+    },
+    "respuesta": {
+      "estado": 201,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Usuario registrado correctamente",
+        "datos": {
+          "usuario": {
+            "id": 5,
+            "nombre": "Laura Mendoza",
+            "correo": "laura.mendoza.1792727047113@correo.com",
+            "rol": "gestor",
+            "activo": true,
+            "creadoEn": "2026-10-23 03:44:07",
+            "actualizadoEn": "2026-10-23 03:44:07"
+          },
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sIjoiZ2VzdG9yIiwiaWF0IjoxNzkyNzI3MDQ3LCJleHAiOjE3OTI3NTU4NDd9.yCzVGGUbmlyWXH6aEgOjh27hj9fxqhddJ2hnHW__xYU"
+        }
+      }
+    }
+  },
+  "registro_correo_repetido": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/auth/registro",
+      "conToken": false,
+      "cuerpo": {
+        "nombre": "Otra Persona",
+        "correo": "admin@plataforma.com",
+        "password": "Prueba2026"
+      }
+    },
+    "respuesta": {
+      "estado": 409,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "Ya hay una cuenta registrada con ese correo"
+      }
+    }
+  },
+  "registro_datos_invalidos": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/auth/registro",
+      "conToken": false,
+      "cuerpo": {
+        "nombre": "Al",
+        "correo": "correo-malo",
+        "password": "123",
+        "rol": "admin"
+      }
+    },
+    "respuesta": {
+      "estado": 400,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "Hay datos inválidos en la petición",
+        "errores": [
+          {
+            "campo": "nombre",
+            "mensaje": "El campo nombre debe tener mínimo 3 caracteres"
+          },
+          {
+            "campo": "correo",
+            "mensaje": "El campo correo debe ser un correo válido"
+          },
+          {
+            "campo": "password",
+            "mensaje": "El campo password debe tener mínimo 8 caracteres"
+          },
+          {
+            "campo": "rol",
+            "mensaje": "El campo rol solo acepta: gestor, consultor"
+          }
+        ]
+      }
+    }
+  },
+  "login_ok": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/auth/login",
+      "conToken": false,
+      "cuerpo": {
+        "correo": "admin@plataforma.com",
+        "password": "Ambiental2026"
+      }
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Autenticación satisfactoria",
+        "datos": {
+          "usuario": {
+            "id": 1,
+            "nombre": "Administrador General",
+            "correo": "admin@plataforma.com",
+            "rol": "admin",
+            "activo": true,
+            "creadoEn": "2026-10-23 03:44:05",
+            "actualizadoEn": "2026-10-23 03:44:05"
+          },
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sIjoiYWRtaW4iLCJpYXQiOjE3OTI3MjcwNDcsImV4cCI6MTc5Mjc1NTg0N30.60mVOas0DEdR6FQxjz6WQsE26yDL06nlNBKu3NJm9iA"
+        }
+      }
+    }
+  },
+  "login_fallido": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/auth/login",
+      "conToken": false,
+      "cuerpo": {
+        "correo": "admin@plataforma.com",
+        "password": "claveEquivocada1"
+      }
+    },
+    "respuesta": {
+      "estado": 401,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "Error en la autenticación: correo o contraseña incorrectos"
+      }
+    }
+  },
+  "login_gestor": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/auth/login",
+      "conToken": false,
+      "cuerpo": {
+        "correo": "roycer.cervantes@plataforma.com",
+        "password": "Ambiental2026"
+      }
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Autenticación satisfactoria",
+        "datos": {
+          "usuario": {
+            "id": 2,
+            "nombre": "Roycer Cervantes",
+            "correo": "roycer.cervantes@plataforma.com",
+            "rol": "gestor",
+            "activo": true,
+            "creadoEn": "2026-10-23 03:44:05",
+            "actualizadoEn": "2026-10-23 03:44:05"
+          },
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sIjoiZ2VzdG9yIiwiaWF0IjoxNzkyNzI3MDQ3LCJleHAiOjE3OTI3NTU4NDd9.jyhLgtRnxarTfqz2y3IpfssTwN86KYQMZNrf616yTr0"
+        }
+      }
+    }
+  },
+  "login_gestor_2": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/auth/login",
+      "conToken": false,
+      "cuerpo": {
+        "correo": "sebastian.rodriguez@plataforma.com",
+        "password": "Ambiental2026"
+      }
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Autenticación satisfactoria",
+        "datos": {
+          "usuario": {
+            "id": 3,
+            "nombre": "Sebastián Rodríguez",
+            "correo": "sebastian.rodriguez@plataforma.com",
+            "rol": "gestor",
+            "activo": true,
+            "creadoEn": "2026-10-23 03:44:05",
+            "actualizadoEn": "2026-10-23 03:44:05"
+          },
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sIjoiZ2VzdG9yIiwiaWF0IjoxNzkyNzI3MDQ3LCJleHAiOjE3OTI3NTU4NDd9.BTGQupIqUblvREkpQlFlOfGdQbooTZDU5smeUAuovQk"
+        }
+      }
+    }
+  },
+  "login_consultor": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/auth/login",
+      "conToken": false,
+      "cuerpo": {
+        "correo": "consultor@plataforma.com",
+        "password": "Ambiental2026"
+      }
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Autenticación satisfactoria",
+        "datos": {
+          "usuario": {
+            "id": 4,
+            "nombre": "Consultor Externo",
+            "correo": "consultor@plataforma.com",
+            "rol": "consultor",
+            "activo": true,
+            "creadoEn": "2026-10-23 03:44:05",
+            "actualizadoEn": "2026-10-23 03:44:05"
+          },
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sIjoiY29uc3VsdG9yIiwiaWF0IjoxNzkyNzI3MDQ3LCJleHAiOjE3OTI3NTU4NDd9.eefws13r8_fJymVFyJAwkod6pg3NkdHWCe4oL50IOXA"
+        }
+      }
+    }
+  },
+  "perfil": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/auth/perfil",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Perfil del usuario autenticado",
+        "datos": {
+          "id": 2,
+          "nombre": "Roycer Cervantes",
+          "correo": "roycer.cervantes@plataforma.com",
+          "rol": "gestor",
+          "activo": true,
+          "creadoEn": "2026-10-23 03:44:05",
+          "actualizadoEn": "2026-10-23 03:44:05"
+        }
+      }
+    }
+  },
+  "perfil_sin_token": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/auth/perfil",
+      "conToken": false,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 401,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "Debes iniciar sesión. Falta el token de acceso"
+      }
+    }
+  },
+  "token_invalido": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/auth/perfil",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 401,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "Token inválido"
+      }
+    }
+  },
+  "usuarios_listar": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/usuarios?limite=5",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Listado de usuarios",
+        "datos": [
+          {
+            "id": 1,
+            "nombre": "Administrador General",
+            "correo": "admin@plataforma.com",
+            "rol": "admin",
+            "activo": true,
+            "creadoEn": "2026-10-23 03:44:05",
+            "actualizadoEn": "2026-10-23 03:44:05"
+          },
+          {
+            "id": 4,
+            "nombre": "Consultor Externo",
+            "correo": "consultor@plataforma.com",
+            "rol": "consultor",
+            "activo": true,
+            "creadoEn": "2026-10-23 03:44:05",
+            "actualizadoEn": "2026-10-23 03:44:05"
+          },
+          {
+            "id": 5,
+            "nombre": "Laura Mendoza",
+            "correo": "laura.mendoza.1792727047113@correo.com",
+            "rol": "gestor",
+            "activo": true,
+            "creadoEn": "2026-10-23 03:44:07",
+            "actualizadoEn": "2026-10-23 03:44:07"
+          },
+          {
+            "id": 2,
+            "nombre": "Roycer Cervantes",
+            "correo": "roycer.cervantes@plataforma.com",
+            "rol": "gestor",
+            "activo": true,
+            "creadoEn": "2026-10-23 03:44:05",
+            "actualizadoEn": "2026-10-23 03:44:05"
+          },
+          {
+            "id": 3,
+            "nombre": "Sebastián Rodríguez",
+            "correo": "sebastian.rodriguez@plataforma.com",
+            "rol": "gestor",
+            "activo": true,
+            "creadoEn": "2026-10-23 03:44:05",
+            "actualizadoEn": "2026-10-23 03:44:05"
+          }
+        ],
+        "paginacion": {
+          "total": 5,
+          "pagina": 1,
+          "limite": 5,
+          "totalPaginas": 1
+        }
+      }
+    }
+  },
+  "usuarios_listar_sin_permiso": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/usuarios",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 403,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "No tienes permisos para realizar esta acción"
+      }
+    }
+  },
+  "usuario_obtener": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/usuarios/5",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Usuario encontrado",
+        "datos": {
+          "id": 5,
+          "nombre": "Laura Mendoza",
+          "correo": "laura.mendoza.1792727047113@correo.com",
+          "rol": "gestor",
+          "activo": true,
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "usuario_obtener_ajeno": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/usuarios/5",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 403,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "Solo puedes consultar tu propia cuenta"
+      }
+    }
+  },
+  "usuario_actualizar": {
+    "peticion": {
+      "metodo": "PUT",
+      "url": "/api/usuarios/5",
+      "conToken": true,
+      "cuerpo": {
+        "nombre": "Laura Mendoza Pérez"
+      }
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Usuario actualizado correctamente",
+        "datos": {
+          "id": 5,
+          "nombre": "Laura Mendoza Pérez",
+          "correo": "laura.mendoza.1792727047113@correo.com",
+          "rol": "gestor",
+          "activo": true,
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "usuario_cambiar_rol": {
+    "peticion": {
+      "metodo": "PATCH",
+      "url": "/api/usuarios/5/rol",
+      "conToken": true,
+      "cuerpo": {
+        "rol": "consultor"
+      }
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Rol actualizado a consultor",
+        "datos": {
+          "id": 5,
+          "nombre": "Laura Mendoza Pérez",
+          "correo": "laura.mendoza.1792727047113@correo.com",
+          "rol": "consultor",
+          "activo": true,
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "proyectos_listar": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/proyectos?limite=5",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Listado de proyectos",
+        "datos": [
+          {
+            "id": 2,
+            "codigo": "PIA-2026-0002",
+            "nombre": "Planta de tratamiento de aguas residuales del sector Gaira",
+            "descripcion": "Construcción de una PTAR con lagunas de estabilización para reducir vertimientos directos al mar.",
+            "tipo": "saneamiento",
+            "municipio": "Santa Marta",
+            "departamento": "Magdalena",
+            "latitud": 11.183,
+            "longitud": -74.226,
+            "fechaInicio": "2026-05-10",
+            "fechaFin": "2027-12-15",
+            "presupuesto": 1800000000,
+            "estado": "planeacion",
+            "responsableId": 3,
+            "responsableNombre": "Sebastián Rodríguez",
+            "creadoEn": "2026-10-23 03:44:05",
+            "actualizadoEn": "2026-10-23 03:44:05"
+          },
+          {
+            "id": 1,
+            "codigo": "PIA-2026-0001",
+            "nombre": "Restauración de manglar en la Ciénaga Grande de Santa Marta",
+            "descripcion": "Siembra de propágulos de mangle rojo y recuperación de caños para mejorar el intercambio de agua dulce y salada.",
+            "tipo": "restauracion",
+            "municipio": "Pueblo Viejo",
+            "departamento": "Magdalena",
+            "latitud": 10.991,
+            "longitud": -74.282,
+            "fechaInicio": "2026-02-01",
+            "fechaFin": "2027-01-31",
+            "presupuesto": 450000000,
+            "estado": "ejecucion",
+            "responsableId": 2,
+            "responsableNombre": "Roycer Cervantes",
+            "creadoEn": "2026-10-23 03:44:05",
+            "actualizadoEn": "2026-10-23 03:44:05"
+          },
+          {
+            "id": 3,
+            "codigo": "PIA-2026-0003",
+            "nombre": "Monitoreo de calidad del agua del río Manzanares",
+            "descripcion": "Campañas de muestreo para evaluar la calidad del río a su paso por la ciudad.",
+            "tipo": "conservacion",
+            "municipio": "Santa Marta",
+            "departamento": "Magdalena",
+            "latitud": 11.237,
+            "longitud": -74.188,
+            "fechaInicio": "2026-01-15",
+            "fechaFin": "2026-12-15",
+            "presupuesto": 85000000,
+            "estado": "ejecucion",
+            "responsableId": 2,
+            "responsableNombre": "Roycer Cervantes",
+            "creadoEn": "2026-10-23 03:44:05",
+            "actualizadoEn": "2026-10-23 03:44:05"
+          }
+        ],
+        "paginacion": {
+          "total": 3,
+          "pagina": 1,
+          "limite": 5,
+          "totalPaginas": 1
+        }
+      }
+    }
+  },
+  "proyectos_filtrar": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/proyectos?estado=ejecucion&buscar=manglar",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Listado de proyectos",
+        "datos": [
+          {
+            "id": 1,
+            "codigo": "PIA-2026-0001",
+            "nombre": "Restauración de manglar en la Ciénaga Grande de Santa Marta",
+            "descripcion": "Siembra de propágulos de mangle rojo y recuperación de caños para mejorar el intercambio de agua dulce y salada.",
+            "tipo": "restauracion",
+            "municipio": "Pueblo Viejo",
+            "departamento": "Magdalena",
+            "latitud": 10.991,
+            "longitud": -74.282,
+            "fechaInicio": "2026-02-01",
+            "fechaFin": "2027-01-31",
+            "presupuesto": 450000000,
+            "estado": "ejecucion",
+            "responsableId": 2,
+            "responsableNombre": "Roycer Cervantes",
+            "creadoEn": "2026-10-23 03:44:05",
+            "actualizadoEn": "2026-10-23 03:44:05"
+          }
+        ],
+        "paginacion": {
+          "total": 1,
+          "pagina": 1,
+          "limite": 10,
+          "totalPaginas": 1
+        }
+      }
+    }
+  },
+  "proyectos_filtro_invalido": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/proyectos?estado=terminado",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 400,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "El filtro estado solo acepta: planeacion, ejecucion, finalizado, suspendido"
+      }
+    }
+  },
+  "proyecto_crear": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/proyectos",
+      "conToken": true,
+      "cuerpo": {
+        "nombre": "Reforestación de la cuenca alta del río Gaira",
+        "descripcion": "Siembra de especies nativas en zonas de recarga hídrica afectadas por incendios.",
+        "tipo": "restauracion",
+        "municipio": "Santa Marta",
+        "departamento": "Magdalena",
+        "latitud": 11.112,
+        "longitud": -74.071,
+        "fechaInicio": "2026-11-01",
+        "fechaFin": "2027-10-31",
+        "presupuesto": 120000000
+      }
+    },
+    "respuesta": {
+      "estado": 201,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Proyecto creado correctamente",
+        "datos": {
+          "id": 4,
+          "codigo": "PIA-2026-0004",
+          "nombre": "Reforestación de la cuenca alta del río Gaira",
+          "descripcion": "Siembra de especies nativas en zonas de recarga hídrica afectadas por incendios.",
+          "tipo": "restauracion",
+          "municipio": "Santa Marta",
+          "departamento": "Magdalena",
+          "latitud": 11.112,
+          "longitud": -74.071,
+          "fechaInicio": "2026-11-01",
+          "fechaFin": "2027-10-31",
+          "presupuesto": 120000000,
+          "estado": "planeacion",
+          "responsableId": 2,
+          "responsableNombre": "Roycer Cervantes",
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "proyecto_crear_invalido": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/proyectos",
+      "conToken": true,
+      "cuerpo": {
+        "nombre": "Reforestación de la cuenca alta del río Gaira",
+        "descripcion": "Siembra de especies nativas en zonas de recarga hídrica afectadas por incendios.",
+        "tipo": "mineria",
+        "municipio": "Santa Marta",
+        "departamento": "Magdalena",
+        "latitud": 200,
+        "longitud": -74.071,
+        "fechaInicio": "2026-11-01",
+        "fechaFin": "2026-01-01",
+        "presupuesto": 120000000
+      }
+    },
+    "respuesta": {
+      "estado": 400,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "Hay datos inválidos en la petición",
+        "errores": [
+          {
+            "campo": "tipo",
+            "mensaje": "El campo tipo solo acepta: infraestructura, restauracion, conservacion, saneamiento, energia, educacion, otro"
+          },
+          {
+            "campo": "latitud",
+            "mensaje": "El campo latitud debe ser menor o igual a 90"
+          }
+        ]
+      }
+    }
+  },
+  "proyecto_crear_sin_permiso": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/proyectos",
+      "conToken": true,
+      "cuerpo": {
+        "nombre": "Reforestación de la cuenca alta del río Gaira",
+        "descripcion": "Siembra de especies nativas en zonas de recarga hídrica afectadas por incendios.",
+        "tipo": "restauracion",
+        "municipio": "Santa Marta",
+        "departamento": "Magdalena",
+        "latitud": 11.112,
+        "longitud": -74.071,
+        "fechaInicio": "2026-11-01",
+        "fechaFin": "2027-10-31",
+        "presupuesto": 120000000
+      }
+    },
+    "respuesta": {
+      "estado": 403,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "No tienes permisos para realizar esta acción"
+      }
+    }
+  },
+  "proyecto_obtener": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/proyectos/1",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Proyecto encontrado",
+        "datos": {
+          "id": 1,
+          "codigo": "PIA-2026-0001",
+          "nombre": "Restauración de manglar en la Ciénaga Grande de Santa Marta",
+          "descripcion": "Siembra de propágulos de mangle rojo y recuperación de caños para mejorar el intercambio de agua dulce y salada.",
+          "tipo": "restauracion",
+          "municipio": "Pueblo Viejo",
+          "departamento": "Magdalena",
+          "latitud": 10.991,
+          "longitud": -74.282,
+          "fechaInicio": "2026-02-01",
+          "fechaFin": "2027-01-31",
+          "presupuesto": 450000000,
+          "estado": "ejecucion",
+          "responsableId": 2,
+          "responsableNombre": "Roycer Cervantes",
+          "creadoEn": "2026-10-23 03:44:05",
+          "actualizadoEn": "2026-10-23 03:44:05",
+          "impactos": [
+            {
+              "id": 1,
+              "proyectoId": 1,
+              "componente": "flora",
+              "descripcion": "Recuperación de cobertura de manglar",
+              "naturaleza": "positivo",
+              "magnitud": 8,
+              "probabilidad": 9,
+              "importancia": 72,
+              "nivel": "critico",
+              "medidaManejo": "Seguimiento trimestral de supervivencia de plántulas",
+              "creadoEn": "2026-10-23 03:44:05",
+              "actualizadoEn": "2026-10-23 03:44:05"
+            },
+            {
+              "id": 2,
+              "proyectoId": 1,
+              "componente": "agua",
+              "descripcion": "Aumento temporal de sólidos suspendidos por dragado de caños",
+              "naturaleza": "negativo",
+              "magnitud": 6,
+              "probabilidad": 7,
+              "importancia": 42,
+              "nivel": "alto",
+              "medidaManejo": "Uso de barreras de sedimentos y dragado en marea baja",
+              "creadoEn": "2026-10-23 03:44:05",
+              "actualizadoEn": "2026-10-23 03:44:05"
+            },
+            {
+              "id": 3,
+              "proyectoId": 1,
+              "componente": "social",
+              "descripcion": "Empleo para pescadores de la zona como sembradores",
+              "naturaleza": "positivo",
+              "magnitud": 5,
+              "probabilidad": 8,
+              "importancia": 40,
+              "nivel": "moderado",
+              "medidaManejo": "Contratación prioritaria de la comunidad local",
+              "creadoEn": "2026-10-23 03:44:05",
+              "actualizadoEn": "2026-10-23 03:44:05"
+            }
+          ],
+          "actividades": [
+            {
+              "id": 1,
+              "proyectoId": 1,
+              "titulo": "Recolección de propágulos de mangle rojo",
+              "descripcion": null,
+              "fechaLimite": "2026-03-15",
+              "estado": "completada",
+              "responsableId": 2,
+              "responsableNombre": "Roycer Cervantes",
+              "creadoEn": "2026-10-23 03:44:05",
+              "actualizadoEn": "2026-10-23 03:44:05",
+              "vencida": false
+            },
+            {
+              "id": 2,
+              "proyectoId": 1,
+              "titulo": "Dragado manual del caño Clarín",
+              "descripcion": null,
+              "fechaLimite": "2026-09-30",
+              "estado": "en_progreso",
+              "responsableId": 2,
+              "responsableNombre": "Roycer Cervantes",
+              "creadoEn": "2026-10-23 03:44:05",
+              "actualizadoEn": "2026-10-23 03:44:05",
+              "vencida": true
+            },
+            {
+              "id": 3,
+              "proyectoId": 1,
+              "titulo": "Informe semestral a Corpamag",
+              "descripcion": null,
+              "fechaLimite": "2026-10-10",
+              "estado": "pendiente",
+              "responsableId": 3,
+              "responsableNombre": "Sebastián Rodríguez",
+              "creadoEn": "2026-10-23 03:44:05",
+              "actualizadoEn": "2026-10-23 03:44:05",
+              "vencida": true
+            }
+          ],
+          "monitoreos": [
+            {
+              "id": 2,
+              "proyectoId": 1,
+              "parametro": "Oxígeno disuelto",
+              "valor": 3.1,
+              "unidad": "mg/L",
+              "limitePermisible": 4,
+              "tipoLimite": "minimo",
+              "cumpleNorma": false,
+              "puntoMuestreo": "Boca de la Barra",
+              "fechaMuestreo": "2026-08-20",
+              "observaciones": "Valor bajo, posible proliferación de algas",
+              "creadoEn": "2026-10-23 03:44:05"
+            },
+            {
+              "id": 1,
+              "proyectoId": 1,
+              "parametro": "Salinidad",
+              "valor": 28.5,
+              "unidad": "PSU",
+              "limitePermisible": 35,
+              "tipoLimite": "maximo",
+              "cumpleNorma": true,
+              "puntoMuestreo": "Caño Clarín",
+              "fechaMuestreo": "2026-08-20",
+              "observaciones": null,
+              "creadoEn": "2026-10-23 03:44:05"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "proyecto_id_invalido": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/proyectos/abc",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 400,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "El parámetro id debe ser un número entero positivo"
+      }
+    }
+  },
+  "proyecto_actualizar": {
+    "peticion": {
+      "metodo": "PUT",
+      "url": "/api/proyectos/4",
+      "conToken": true,
+      "cuerpo": {
+        "presupuesto": 135000000,
+        "descripcion": "Siembra de 15.000 árboles nativos en zonas de recarga hídrica."
+      }
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Proyecto actualizado correctamente",
+        "datos": {
+          "id": 4,
+          "codigo": "PIA-2026-0004",
+          "nombre": "Reforestación de la cuenca alta del río Gaira",
+          "descripcion": "Siembra de 15.000 árboles nativos en zonas de recarga hídrica.",
+          "tipo": "restauracion",
+          "municipio": "Santa Marta",
+          "departamento": "Magdalena",
+          "latitud": 11.112,
+          "longitud": -74.071,
+          "fechaInicio": "2026-11-01",
+          "fechaFin": "2027-10-31",
+          "presupuesto": 135000000,
+          "estado": "planeacion",
+          "responsableId": 2,
+          "responsableNombre": "Roycer Cervantes",
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "proyecto_actualizar_ajeno": {
+    "peticion": {
+      "metodo": "PUT",
+      "url": "/api/proyectos/4",
+      "conToken": true,
+      "cuerpo": {
+        "presupuesto": 1
+      }
+    },
+    "respuesta": {
+      "estado": 403,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "Solo el responsable del proyecto o un administrador pueden modificarlo"
+      }
+    }
+  },
+  "proyecto_cambiar_estado": {
+    "peticion": {
+      "metodo": "PATCH",
+      "url": "/api/proyectos/4/estado",
+      "conToken": true,
+      "cuerpo": {
+        "estado": "ejecucion"
+      }
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Estado del proyecto cambiado a ejecucion",
+        "datos": {
+          "id": 4,
+          "codigo": "PIA-2026-0004",
+          "nombre": "Reforestación de la cuenca alta del río Gaira",
+          "descripcion": "Siembra de 15.000 árboles nativos en zonas de recarga hídrica.",
+          "tipo": "restauracion",
+          "municipio": "Santa Marta",
+          "departamento": "Magdalena",
+          "latitud": 11.112,
+          "longitud": -74.071,
+          "fechaInicio": "2026-11-01",
+          "fechaFin": "2027-10-31",
+          "presupuesto": 135000000,
+          "estado": "ejecucion",
+          "responsableId": 2,
+          "responsableNombre": "Roycer Cervantes",
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "impacto_crear": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/proyectos/4/impactos",
+      "conToken": true,
+      "cuerpo": {
+        "componente": "suelo",
+        "descripcion": "Erosión por remoción de maleza en pendientes fuertes",
+        "naturaleza": "negativo",
+        "magnitud": 8,
+        "probabilidad": 9,
+        "medidaManejo": "Siembra en curvas de nivel y trinchos de contención"
+      }
+    },
+    "respuesta": {
+      "estado": 201,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Impacto ambiental registrado correctamente",
+        "datos": {
+          "id": 8,
+          "proyectoId": 4,
+          "componente": "suelo",
+          "descripcion": "Erosión por remoción de maleza en pendientes fuertes",
+          "naturaleza": "negativo",
+          "magnitud": 8,
+          "probabilidad": 9,
+          "importancia": 72,
+          "nivel": "critico",
+          "medidaManejo": "Siembra en curvas de nivel y trinchos de contención",
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "impacto_crear_invalido": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/proyectos/4/impactos",
+      "conToken": true,
+      "cuerpo": {
+        "componente": "ruido",
+        "descripcion": "x",
+        "naturaleza": "neutro",
+        "magnitud": 15,
+        "probabilidad": 0
+      }
+    },
+    "respuesta": {
+      "estado": 400,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "Hay datos inválidos en la petición",
+        "errores": [
+          {
+            "campo": "componente",
+            "mensaje": "El campo componente solo acepta: agua, aire, suelo, flora, fauna, paisaje, social"
+          },
+          {
+            "campo": "descripcion",
+            "mensaje": "El campo descripcion debe tener mínimo 5 caracteres"
+          },
+          {
+            "campo": "naturaleza",
+            "mensaje": "El campo naturaleza solo acepta: positivo, negativo"
+          },
+          {
+            "campo": "magnitud",
+            "mensaje": "El campo magnitud debe ser menor o igual a 10"
+          },
+          {
+            "campo": "probabilidad",
+            "mensaje": "El campo probabilidad debe ser mayor o igual a 1"
+          }
+        ]
+      }
+    }
+  },
+  "impactos_listar": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/proyectos/4/impactos?nivel=critico",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Impactos del proyecto 4",
+        "datos": [
+          {
+            "id": 8,
+            "proyectoId": 4,
+            "componente": "suelo",
+            "descripcion": "Erosión por remoción de maleza en pendientes fuertes",
+            "naturaleza": "negativo",
+            "magnitud": 8,
+            "probabilidad": 9,
+            "importancia": 72,
+            "nivel": "critico",
+            "medidaManejo": "Siembra en curvas de nivel y trinchos de contención",
+            "creadoEn": "2026-10-23 03:44:07",
+            "actualizadoEn": "2026-10-23 03:44:07"
+          }
+        ],
+        "total": 1
+      }
+    }
+  },
+  "impacto_obtener": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/impactos/8",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Impacto encontrado",
+        "datos": {
+          "id": 8,
+          "proyectoId": 4,
+          "componente": "suelo",
+          "descripcion": "Erosión por remoción de maleza en pendientes fuertes",
+          "naturaleza": "negativo",
+          "magnitud": 8,
+          "probabilidad": 9,
+          "importancia": 72,
+          "nivel": "critico",
+          "medidaManejo": "Siembra en curvas de nivel y trinchos de contención",
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "impacto_actualizar": {
+    "peticion": {
+      "metodo": "PUT",
+      "url": "/api/impactos/8",
+      "conToken": true,
+      "cuerpo": {
+        "magnitud": 5
+      }
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Impacto ambiental actualizado correctamente",
+        "datos": {
+          "id": 8,
+          "proyectoId": 4,
+          "componente": "suelo",
+          "descripcion": "Erosión por remoción de maleza en pendientes fuertes",
+          "naturaleza": "negativo",
+          "magnitud": 5,
+          "probabilidad": 9,
+          "importancia": 45,
+          "nivel": "alto",
+          "medidaManejo": "Siembra en curvas de nivel y trinchos de contención",
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "actividad_crear": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/proyectos/4/actividades",
+      "conToken": true,
+      "cuerpo": {
+        "titulo": "Construcción del vivero temporal",
+        "descripcion": "Vivero para 5.000 plántulas de guáimaro y ceiba",
+        "fechaLimite": "2026-12-15",
+        "responsableId": 2
+      }
+    },
+    "respuesta": {
+      "estado": 201,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Actividad creada correctamente",
+        "datos": {
+          "id": 8,
+          "proyectoId": 4,
+          "titulo": "Construcción del vivero temporal",
+          "descripcion": "Vivero para 5.000 plántulas de guáimaro y ceiba",
+          "fechaLimite": "2026-12-15",
+          "estado": "pendiente",
+          "responsableId": 2,
+          "responsableNombre": "Roycer Cervantes",
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07",
+          "vencida": false
+        }
+      }
+    }
+  },
+  "actividad_crear_fecha_invalida": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/proyectos/4/actividades",
+      "conToken": true,
+      "cuerpo": {
+        "titulo": "Tarea con fecha mala",
+        "fechaLimite": "2026-01-10"
+      }
+    },
+    "respuesta": {
+      "estado": 400,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "Hay datos inválidos en la petición",
+        "errores": [
+          {
+            "campo": "fechaLimite",
+            "mensaje": "La fecha límite no puede ser anterior al inicio del proyecto (2026-11-01)"
+          }
+        ]
+      }
+    }
+  },
+  "actividades_listar": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/proyectos/4/actividades",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Actividades del proyecto 4",
+        "datos": [
+          {
+            "id": 8,
+            "proyectoId": 4,
+            "titulo": "Construcción del vivero temporal",
+            "descripcion": "Vivero para 5.000 plántulas de guáimaro y ceiba",
+            "fechaLimite": "2026-12-15",
+            "estado": "pendiente",
+            "responsableId": 2,
+            "responsableNombre": "Roycer Cervantes",
+            "creadoEn": "2026-10-23 03:44:07",
+            "actualizadoEn": "2026-10-23 03:44:07",
+            "vencida": false
+          }
+        ],
+        "total": 1
+      }
+    }
+  },
+  "actividad_obtener": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/actividades/8",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Actividad encontrada",
+        "datos": {
+          "id": 8,
+          "proyectoId": 4,
+          "titulo": "Construcción del vivero temporal",
+          "descripcion": "Vivero para 5.000 plántulas de guáimaro y ceiba",
+          "fechaLimite": "2026-12-15",
+          "estado": "pendiente",
+          "responsableId": 2,
+          "responsableNombre": "Roycer Cervantes",
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07",
+          "vencida": false
+        }
+      }
+    }
+  },
+  "actividad_actualizar": {
+    "peticion": {
+      "metodo": "PUT",
+      "url": "/api/actividades/8",
+      "conToken": true,
+      "cuerpo": {
+        "fechaLimite": "2026-12-20",
+        "estado": "en_progreso"
+      }
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Actividad actualizada correctamente",
+        "datos": {
+          "id": 8,
+          "proyectoId": 4,
+          "titulo": "Construcción del vivero temporal",
+          "descripcion": "Vivero para 5.000 plántulas de guáimaro y ceiba",
+          "fechaLimite": "2026-12-20",
+          "estado": "en_progreso",
+          "responsableId": 2,
+          "responsableNombre": "Roycer Cervantes",
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07",
+          "vencida": false
+        }
+      }
+    }
+  },
+  "actividad_cambiar_estado": {
+    "peticion": {
+      "metodo": "PATCH",
+      "url": "/api/actividades/8/estado",
+      "conToken": true,
+      "cuerpo": {
+        "estado": "completada"
+      }
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Actividad marcada como completada",
+        "datos": {
+          "id": 8,
+          "proyectoId": 4,
+          "titulo": "Construcción del vivero temporal",
+          "descripcion": "Vivero para 5.000 plántulas de guáimaro y ceiba",
+          "fechaLimite": "2026-12-20",
+          "estado": "completada",
+          "responsableId": 2,
+          "responsableNombre": "Roycer Cervantes",
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07",
+          "vencida": false
+        }
+      }
+    }
+  },
+  "monitoreo_crear": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/proyectos/4/monitoreos",
+      "conToken": true,
+      "cuerpo": {
+        "parametro": "Oxígeno disuelto",
+        "valor": 3.2,
+        "unidad": "mg/L",
+        "limitePermisible": 4,
+        "tipoLimite": "minimo",
+        "puntoMuestreo": "Quebrada Mamatoco",
+        "fechaMuestreo": "2026-10-20",
+        "observaciones": "Muestreo después de lluvias fuertes"
+      }
+    },
+    "respuesta": {
+      "estado": 201,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Monitoreo registrado. Atención: el valor está FUERA de la norma",
+        "datos": {
+          "id": 6,
+          "proyectoId": 4,
+          "parametro": "Oxígeno disuelto",
+          "valor": 3.2,
+          "unidad": "mg/L",
+          "limitePermisible": 4,
+          "tipoLimite": "minimo",
+          "cumpleNorma": false,
+          "puntoMuestreo": "Quebrada Mamatoco",
+          "fechaMuestreo": "2026-10-20",
+          "observaciones": "Muestreo después de lluvias fuertes",
+          "creadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "monitoreo_crear_fecha_futura": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/proyectos/4/monitoreos",
+      "conToken": true,
+      "cuerpo": {
+        "parametro": "pH",
+        "valor": 7,
+        "unidad": "unidades",
+        "fechaMuestreo": "2030-01-01"
+      }
+    },
+    "respuesta": {
+      "estado": 400,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "Hay datos inválidos en la petición",
+        "errores": [
+          {
+            "campo": "fechaMuestreo",
+            "mensaje": "La fecha de muestreo no puede ser una fecha futura"
+          }
+        ]
+      }
+    }
+  },
+  "monitoreos_listar": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/proyectos/4/monitoreos?cumpleNorma=false",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Monitoreos del proyecto 4",
+        "datos": [
+          {
+            "id": 6,
+            "proyectoId": 4,
+            "parametro": "Oxígeno disuelto",
+            "valor": 3.2,
+            "unidad": "mg/L",
+            "limitePermisible": 4,
+            "tipoLimite": "minimo",
+            "cumpleNorma": false,
+            "puntoMuestreo": "Quebrada Mamatoco",
+            "fechaMuestreo": "2026-10-20",
+            "observaciones": "Muestreo después de lluvias fuertes",
+            "creadoEn": "2026-10-23 03:44:07"
+          }
+        ],
+        "total": 1
+      }
+    }
+  },
+  "monitoreo_obtener": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/monitoreos/6",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Monitoreo encontrado",
+        "datos": {
+          "id": 6,
+          "proyectoId": 4,
+          "parametro": "Oxígeno disuelto",
+          "valor": 3.2,
+          "unidad": "mg/L",
+          "limitePermisible": 4,
+          "tipoLimite": "minimo",
+          "cumpleNorma": false,
+          "puntoMuestreo": "Quebrada Mamatoco",
+          "fechaMuestreo": "2026-10-20",
+          "observaciones": "Muestreo después de lluvias fuertes",
+          "creadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "monitoreo_actualizar": {
+    "peticion": {
+      "metodo": "PUT",
+      "url": "/api/monitoreos/6",
+      "conToken": true,
+      "cuerpo": {
+        "valor": 5.6,
+        "observaciones": "Segundo muestreo, ya en norma"
+      }
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Monitoreo actualizado correctamente",
+        "datos": {
+          "id": 6,
+          "proyectoId": 4,
+          "parametro": "Oxígeno disuelto",
+          "valor": 5.6,
+          "unidad": "mg/L",
+          "limitePermisible": 4,
+          "tipoLimite": "minimo",
+          "cumpleNorma": true,
+          "puntoMuestreo": "Quebrada Mamatoco",
+          "fechaMuestreo": "2026-10-20",
+          "observaciones": "Segundo muestreo, ya en norma",
+          "creadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "reporte_dashboard": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/reportes/dashboard",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Resumen general de la plataforma",
+        "datos": {
+          "totalProyectos": 4,
+          "proyectosPorEstado": {
+            "planeacion": 1,
+            "ejecucion": 3,
+            "finalizado": 0,
+            "suspendido": 0
+          },
+          "impactosPorNivel": {
+            "bajo": 0,
+            "moderado": 3,
+            "alto": 3,
+            "critico": 2
+          },
+          "impactosPorComponente": {
+            "agua": 3,
+            "aire": 1,
+            "suelo": 2,
+            "flora": 1,
+            "fauna": 0,
+            "paisaje": 0,
+            "social": 1
+          },
+          "actividadesVencidas": 2,
+          "monitoreosFueraDeNorma": 3,
+          "presupuestoTotal": 2470000000
+        }
+      }
+    }
+  },
+  "reporte_proyecto": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/reportes/proyectos/4",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Resumen del proyecto PIA-2026-0004",
+        "datos": {
+          "proyecto": {
+            "id": 4,
+            "codigo": "PIA-2026-0004",
+            "nombre": "Reforestación de la cuenca alta del río Gaira",
+            "estado": "ejecucion"
+          },
+          "impactosPorNivel": {
+            "bajo": 0,
+            "moderado": 0,
+            "alto": 1,
+            "critico": 0
+          },
+          "actividades": {
+            "pendiente": 0,
+            "en_progreso": 0,
+            "completada": 1,
+            "total": 1,
+            "vencidas": 0,
+            "porcentajeAvance": 100
+          },
+          "monitoreos": {
+            "total": 1,
+            "cumplen": 1,
+            "noCumplen": 0
+          }
+        }
+      }
+    }
+  },
+  "monitoreo_eliminar": {
+    "peticion": {
+      "metodo": "DELETE",
+      "url": "/api/monitoreos/6",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Monitoreo eliminado correctamente"
+      }
+    }
+  },
+  "actividad_eliminar": {
+    "peticion": {
+      "metodo": "DELETE",
+      "url": "/api/actividades/8",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Actividad eliminada correctamente"
+      }
+    }
+  },
+  "impacto_eliminar": {
+    "peticion": {
+      "metodo": "DELETE",
+      "url": "/api/impactos/8",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Impacto ambiental eliminado correctamente"
+      }
+    }
+  },
+  "impacto_no_existe": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/impactos/8",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 404,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "No existe un impacto ambiental con id 8"
+      }
+    }
+  },
+  "proyecto_eliminar": {
+    "peticion": {
+      "metodo": "DELETE",
+      "url": "/api/proyectos/4",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Proyecto eliminado junto con sus impactos, actividades y monitoreos"
+      }
+    }
+  },
+  "proyecto_no_existe": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/proyectos/4",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 404,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "No existe un proyecto con id 4"
+      }
+    }
+  },
+  "usuario_desactivar": {
+    "peticion": {
+      "metodo": "DELETE",
+      "url": "/api/usuarios/5",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Usuario desactivado correctamente",
+        "datos": {
+          "id": 5,
+          "nombre": "Laura Mendoza Pérez",
+          "correo": "laura.mendoza.1792727047113@correo.com",
+          "rol": "consultor",
+          "activo": false,
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "login_usuario_desactivado": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/auth/login",
+      "conToken": false,
+      "cuerpo": {
+        "correo": "laura.mendoza.1792727047113@correo.com",
+        "password": "Manglar2026"
+      }
+    },
+    "respuesta": {
+      "estado": 403,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "Tu cuenta está desactivada. Comunícate con el administrador"
+      }
+    }
+  },
+  "usuario_activar": {
+    "peticion": {
+      "metodo": "PATCH",
+      "url": "/api/usuarios/5/activar",
+      "conToken": true,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 200,
+      "cuerpo": {
+        "ok": true,
+        "mensaje": "Usuario activado correctamente",
+        "datos": {
+          "id": 5,
+          "nombre": "Laura Mendoza Pérez",
+          "correo": "laura.mendoza.1792727047113@correo.com",
+          "rol": "consultor",
+          "activo": true,
+          "creadoEn": "2026-10-23 03:44:07",
+          "actualizadoEn": "2026-10-23 03:44:07"
+        }
+      }
+    }
+  },
+  "ruta_inexistente": {
+    "peticion": {
+      "metodo": "GET",
+      "url": "/api/esta-ruta-no-existe",
+      "conToken": false,
+      "cuerpo": null
+    },
+    "respuesta": {
+      "estado": 404,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "La ruta GET /api/esta-ruta-no-existe no existe en la API"
+      }
+    }
+  },
+  "json_mal_formado": {
+    "peticion": {
+      "metodo": "POST",
+      "url": "/api/auth/login",
+      "conToken": false,
+      "cuerpo": "{\"correo\": \"admin@plataforma.com\",}"
+    },
+    "respuesta": {
+      "estado": 400,
+      "cuerpo": {
+        "ok": false,
+        "mensaje": "El cuerpo de la petición no es un JSON válido"
+      }
+    }
+  }
+}

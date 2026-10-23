@@ -1,0 +1,612 @@
+openapi: 3.0.3
+info:
+  title: API Plataforma de Gestión de Proyectos de Impacto Ambiental
+  version: 1.0.0
+  description: |
+    Servicios web REST de la **Plataforma Digital Integral para la Gestión de Proyectos de Impacto Ambiental**.
+
+    Proyecto formativo SENA - Análisis y Desarrollo de Software (228118).
+    Evidencia GA7-220501096-AA5-EV03.
+
+    Autores: **Roycer Cervantes** y **Sebastián Rodríguez**.
+
+    ### Cómo autenticarse
+    1. Haz `POST /api/auth/login` con un usuario de prueba (contraseña `Ambiental2026`).
+    2. Copia el `token` de la respuesta.
+    3. Dale al botón **Authorize** y pégalo.
+
+    ### Formato de las respuestas
+    Todas las respuestas tienen la forma `{ ok, mensaje, datos }` o, si hay error, `{ ok: false, mensaje, errores }`.
+  contact:
+    name: Roycer Cervantes y Sebastián Rodríguez
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local de desarrollo
+tags:
+  - name: Salud
+    description: Estado de la API y la base de datos
+  - name: Autenticación
+    description: Registro, inicio de sesión y perfil
+  - name: Usuarios
+    description: Administración de cuentas
+  - name: Proyectos
+    description: CRUD de proyectos con impacto ambiental
+  - name: Impactos
+    description: Impactos ambientales identificados en cada proyecto
+  - name: Actividades
+    description: Tareas del plan de manejo ambiental
+  - name: Monitoreos
+    description: Mediciones de parámetros ambientales
+  - name: Reportes
+    description: Resúmenes para el dashboard
+
+security:
+  - bearerAuth: []
+
+paths:
+  /salud:
+    get:
+      tags: [Salud]
+      summary: Verifica que la API y MySQL estén funcionando
+      security: []
+      responses:
+        '200': { description: API y base de datos funcionando }
+        '503': { description: La API funciona pero MySQL no responde }
+
+  /auth/registro:
+    post:
+      tags: [Autenticación]
+      summary: Registra un usuario nuevo y devuelve su token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegistroEntrada' }
+            example: { nombre: Laura Mendoza, correo: laura@correo.com, password: Manglar2026, rol: gestor }
+      responses:
+        '201': { $ref: '#/components/responses/SesionOk' }
+        '400': { $ref: '#/components/responses/DatosInvalidos' }
+        '409': { description: Ya hay una cuenta con ese correo }
+
+  /auth/login:
+    post:
+      tags: [Autenticación]
+      summary: Inicia sesión (autenticación satisfactoria o error en la autenticación)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginEntrada' }
+            example: { correo: admin@plataforma.com, password: Ambiental2026 }
+      responses:
+        '200': { $ref: '#/components/responses/SesionOk' }
+        '400': { $ref: '#/components/responses/DatosInvalidos' }
+        '401': { description: Error en la autenticación (correo o contraseña incorrectos) }
+        '403': { description: La cuenta está desactivada }
+
+  /auth/perfil:
+    get:
+      tags: [Autenticación]
+      summary: Datos del usuario dueño del token
+      responses:
+        '200':
+          description: Perfil del usuario
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  mensaje: { type: string }
+                  datos: { $ref: '#/components/schemas/Usuario' }
+        '401': { $ref: '#/components/responses/NoAutenticado' }
+
+  /usuarios:
+    get:
+      tags: [Usuarios]
+      summary: Lista los usuarios (solo admin)
+      parameters:
+        - { in: query, name: rol, schema: { type: string, enum: [admin, gestor, consultor] } }
+        - { in: query, name: activo, schema: { type: boolean } }
+        - { in: query, name: buscar, schema: { type: string }, description: Busca por nombre o correo }
+        - { $ref: '#/components/parameters/Pagina' }
+        - { $ref: '#/components/parameters/Limite' }
+      responses:
+        '200': { description: Listado paginado de usuarios }
+        '401': { $ref: '#/components/responses/NoAutenticado' }
+        '403': { $ref: '#/components/responses/SinPermiso' }
+
+  /usuarios/{id}:
+    parameters:
+      - { $ref: '#/components/parameters/Id' }
+    get:
+      tags: [Usuarios]
+      summary: Consulta un usuario (admin o el mismo usuario)
+      responses:
+        '200': { description: Usuario encontrado }
+        '403': { $ref: '#/components/responses/SinPermiso' }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+    put:
+      tags: [Usuarios]
+      summary: Actualiza nombre, correo o contraseña (admin o el mismo usuario)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre: { type: string, minLength: 3, maxLength: 100 }
+                correo: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+            example: { nombre: Laura Mendoza Pérez }
+      responses:
+        '200': { description: Usuario actualizado }
+        '400': { $ref: '#/components/responses/DatosInvalidos' }
+        '403': { $ref: '#/components/responses/SinPermiso' }
+        '409': { description: El correo ya lo usa otra cuenta }
+    delete:
+      tags: [Usuarios]
+      summary: Desactiva un usuario (solo admin). No se borra para conservar el historial.
+      responses:
+        '200': { description: Usuario desactivado }
+        '400': { description: No puedes desactivarte a ti mismo o ya estaba desactivado }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+
+  /usuarios/{id}/rol:
+    patch:
+      tags: [Usuarios]
+      summary: Cambia el rol de un usuario (solo admin)
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rol]
+              properties:
+                rol: { type: string, enum: [admin, gestor, consultor] }
+      responses:
+        '200': { description: Rol actualizado }
+        '400': { $ref: '#/components/responses/DatosInvalidos' }
+        '403': { $ref: '#/components/responses/SinPermiso' }
+
+  /usuarios/{id}/activar:
+    patch:
+      tags: [Usuarios]
+      summary: Reactiva un usuario desactivado (solo admin)
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { description: Usuario activado }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+
+  /proyectos:
+    get:
+      tags: [Proyectos]
+      summary: Lista los proyectos con filtros y paginación
+      parameters:
+        - { in: query, name: estado, schema: { $ref: '#/components/schemas/EstadoProyecto' } }
+        - { in: query, name: tipo, schema: { $ref: '#/components/schemas/TipoProyecto' } }
+        - { in: query, name: municipio, schema: { type: string } }
+        - { in: query, name: buscar, schema: { type: string }, description: Busca en nombre, código y descripción }
+        - { in: query, name: responsableId, schema: { type: integer } }
+        - { $ref: '#/components/parameters/Pagina' }
+        - { $ref: '#/components/parameters/Limite' }
+      responses:
+        '200': { description: Listado paginado de proyectos }
+        '400': { description: Filtro inválido }
+    post:
+      tags: [Proyectos]
+      summary: Crea un proyecto (admin o gestor)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProyectoEntrada' }
+      responses:
+        '201': { description: Proyecto creado. El código PIA-AAAA-NNNN lo genera la API. }
+        '400': { $ref: '#/components/responses/DatosInvalidos' }
+        '403': { $ref: '#/components/responses/SinPermiso' }
+
+  /proyectos/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Proyectos]
+      summary: Consulta un proyecto con sus impactos, actividades y monitoreos
+      responses:
+        '200': { description: Proyecto encontrado }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+    put:
+      tags: [Proyectos]
+      summary: Actualiza un proyecto (admin o responsable). Se envían solo los campos a cambiar.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProyectoEntrada' }
+            example: { presupuesto: 135000000 }
+      responses:
+        '200': { description: Proyecto actualizado }
+        '400': { $ref: '#/components/responses/DatosInvalidos' }
+        '403': { $ref: '#/components/responses/SinPermiso' }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+    delete:
+      tags: [Proyectos]
+      summary: Elimina el proyecto y todo lo que depende de él (admin o responsable)
+      responses:
+        '200': { description: Proyecto eliminado }
+        '403': { $ref: '#/components/responses/SinPermiso' }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+
+  /proyectos/{id}/estado:
+    patch:
+      tags: [Proyectos]
+      summary: Cambia el estado del proyecto
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [estado]
+              properties:
+                estado: { $ref: '#/components/schemas/EstadoProyecto' }
+      responses:
+        '200': { description: Estado cambiado }
+        '400': { description: Estado inválido o igual al actual }
+        '403': { description: Sin permiso, o proyecto finalizado y el usuario no es admin }
+
+  /proyectos/{proyectoId}/impactos:
+    parameters: [{ $ref: '#/components/parameters/ProyectoId' }]
+    get:
+      tags: [Impactos]
+      summary: Lista los impactos de un proyecto (ordenados por importancia)
+      parameters:
+        - { in: query, name: componente, schema: { type: string, enum: [agua, aire, suelo, flora, fauna, paisaje, social] } }
+        - { in: query, name: nivel, schema: { type: string, enum: [bajo, moderado, alto, critico] } }
+        - { in: query, name: naturaleza, schema: { type: string, enum: [positivo, negativo] } }
+      responses:
+        '200': { description: Listado de impactos }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+    post:
+      tags: [Impactos]
+      summary: Registra un impacto. La API calcula importancia (magnitud x probabilidad) y nivel.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ImpactoEntrada' }
+      responses:
+        '201': { description: Impacto registrado }
+        '400': { $ref: '#/components/responses/DatosInvalidos' }
+        '403': { $ref: '#/components/responses/SinPermiso' }
+
+  /impactos/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Impactos]
+      summary: Consulta un impacto
+      responses:
+        '200': { description: Impacto encontrado }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+    put:
+      tags: [Impactos]
+      summary: Actualiza un impacto (si cambia magnitud o probabilidad se recalcula el nivel)
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ImpactoEntrada' }
+            example: { magnitud: 5 }
+      responses:
+        '200': { description: Impacto actualizado }
+        '400': { $ref: '#/components/responses/DatosInvalidos' }
+        '403': { $ref: '#/components/responses/SinPermiso' }
+    delete:
+      tags: [Impactos]
+      summary: Elimina un impacto
+      responses:
+        '200': { description: Impacto eliminado }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+
+  /proyectos/{proyectoId}/actividades:
+    parameters: [{ $ref: '#/components/parameters/ProyectoId' }]
+    get:
+      tags: [Actividades]
+      summary: Lista las actividades de un proyecto (incluye el campo calculado "vencida")
+      parameters:
+        - { in: query, name: estado, schema: { type: string, enum: [pendiente, en_progreso, completada] } }
+      responses:
+        '200': { description: Listado de actividades }
+    post:
+      tags: [Actividades]
+      summary: Crea una actividad del plan de manejo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActividadEntrada' }
+      responses:
+        '201': { description: Actividad creada }
+        '400': { description: Datos inválidos o fecha límite anterior al inicio del proyecto }
+        '403': { $ref: '#/components/responses/SinPermiso' }
+
+  /actividades/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Actividades]
+      summary: Consulta una actividad
+      responses:
+        '200': { description: Actividad encontrada }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+    put:
+      tags: [Actividades]
+      summary: Actualiza una actividad
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActividadEntrada' }
+      responses:
+        '200': { description: Actividad actualizada }
+        '400': { $ref: '#/components/responses/DatosInvalidos' }
+    delete:
+      tags: [Actividades]
+      summary: Elimina una actividad
+      responses:
+        '200': { description: Actividad eliminada }
+
+  /actividades/{id}/estado:
+    patch:
+      tags: [Actividades]
+      summary: Cambia el estado de una actividad
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [estado]
+              properties:
+                estado: { type: string, enum: [pendiente, en_progreso, completada] }
+      responses:
+        '200': { description: Estado actualizado }
+        '400': { description: Estado inválido }
+
+  /proyectos/{proyectoId}/monitoreos:
+    parameters: [{ $ref: '#/components/parameters/ProyectoId' }]
+    get:
+      tags: [Monitoreos]
+      summary: Lista los monitoreos de un proyecto
+      parameters:
+        - { in: query, name: parametro, schema: { type: string } }
+        - { in: query, name: cumpleNorma, schema: { type: boolean } }
+        - { in: query, name: desde, schema: { type: string, format: date } }
+        - { in: query, name: hasta, schema: { type: string, format: date } }
+      responses:
+        '200': { description: Listado de monitoreos }
+    post:
+      tags: [Monitoreos]
+      summary: Registra una medición. La API calcula si cumple la norma.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MonitoreoEntrada' }
+      responses:
+        '201': { description: Monitoreo registrado (el mensaje avisa si está fuera de norma) }
+        '400': { description: Datos inválidos o fecha de muestreo futura }
+
+  /monitoreos/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      tags: [Monitoreos]
+      summary: Consulta un monitoreo
+      responses:
+        '200': { description: Monitoreo encontrado }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+    put:
+      tags: [Monitoreos]
+      summary: Actualiza un monitoreo (se recalcula cumpleNorma)
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MonitoreoEntrada' }
+            example: { valor: 5.6 }
+      responses:
+        '200': { description: Monitoreo actualizado }
+    delete:
+      tags: [Monitoreos]
+      summary: Elimina un monitoreo
+      responses:
+        '200': { description: Monitoreo eliminado }
+
+  /reportes/dashboard:
+    get:
+      tags: [Reportes]
+      summary: Números generales de la plataforma para el Dashboard
+      responses:
+        '200': { description: Resumen general }
+
+  /reportes/proyectos/{id}:
+    get:
+      tags: [Reportes]
+      summary: Resumen de un proyecto (impactos por nivel, % de avance, monitoreos)
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { description: Resumen del proyecto }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    Id:
+      in: path
+      name: id
+      required: true
+      schema: { type: integer, minimum: 1 }
+    ProyectoId:
+      in: path
+      name: proyectoId
+      required: true
+      schema: { type: integer, minimum: 1 }
+    Pagina:
+      in: query
+      name: pagina
+      schema: { type: integer, minimum: 1, default: 1 }
+    Limite:
+      in: query
+      name: limite
+      schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
+
+  responses:
+    SesionOk:
+      description: Sesión iniciada / usuario registrado
+      content:
+        application/json:
+          example:
+            ok: true
+            mensaje: Autenticación satisfactoria
+            datos:
+              usuario: { id: 1, nombre: Administrador General, correo: admin@plataforma.com, rol: admin, activo: true }
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    DatosInvalidos:
+      description: Datos inválidos
+      content:
+        application/json:
+          example:
+            ok: false
+            mensaje: Hay datos inválidos en la petición
+            errores: [{ campo: correo, mensaje: El campo correo debe ser un correo válido }]
+    NoAutenticado:
+      description: Falta el token o es inválido
+      content:
+        application/json:
+          example: { ok: false, mensaje: Debes iniciar sesión. Falta el token de acceso }
+    SinPermiso:
+      description: El usuario no tiene permisos
+      content:
+        application/json:
+          example: { ok: false, mensaje: No tienes permisos para realizar esta acción }
+    NoEncontrado:
+      description: El recurso no existe
+      content:
+        application/json:
+          example: { ok: false, mensaje: No existe un proyecto con id 99 }
+
+  schemas:
+    EstadoProyecto:
+      type: string
+      enum: [planeacion, ejecucion, finalizado, suspendido]
+    TipoProyecto:
+      type: string
+      enum: [infraestructura, restauracion, conservacion, saneamiento, energia, educacion, otro]
+    RegistroEntrada:
+      type: object
+      required: [nombre, correo, password]
+      properties:
+        nombre: { type: string, minLength: 3, maxLength: 100 }
+        correo: { type: string, format: email }
+        password: { type: string, minLength: 8, description: Debe tener al menos una letra y un número }
+        rol: { type: string, enum: [gestor, consultor], default: consultor }
+    LoginEntrada:
+      type: object
+      required: [correo, password]
+      properties:
+        correo: { type: string, format: email }
+        password: { type: string }
+    Usuario:
+      type: object
+      properties:
+        id: { type: integer }
+        nombre: { type: string }
+        correo: { type: string }
+        rol: { type: string, enum: [admin, gestor, consultor] }
+        activo: { type: boolean }
+        creadoEn: { type: string }
+        actualizadoEn: { type: string }
+    ProyectoEntrada:
+      type: object
+      required: [nombre, tipo, municipio, departamento, fechaInicio]
+      properties:
+        nombre: { type: string, minLength: 5, maxLength: 150 }
+        descripcion: { type: string, maxLength: 2000 }
+        tipo: { $ref: '#/components/schemas/TipoProyecto' }
+        municipio: { type: string }
+        departamento: { type: string }
+        latitud: { type: number, minimum: -90, maximum: 90 }
+        longitud: { type: number, minimum: -180, maximum: 180 }
+        fechaInicio: { type: string, format: date }
+        fechaFin: { type: string, format: date, description: No puede ser anterior a fechaInicio }
+        presupuesto: { type: number, minimum: 0 }
+        estado: { $ref: '#/components/schemas/EstadoProyecto' }
+        responsableId: { type: integer, description: Solo lo puede asignar un admin }
+      example:
+        nombre: Reforestación de la cuenca alta del río Gaira
+        descripcion: Siembra de especies nativas en zonas de recarga hídrica
+        tipo: restauracion
+        municipio: Santa Marta
+        departamento: Magdalena
+        latitud: 11.112
+        longitud: -74.071
+        fechaInicio: '2026-11-01'
+        fechaFin: '2027-10-31'
+        presupuesto: 120000000
+    ImpactoEntrada:
+      type: object
+      required: [componente, descripcion, naturaleza, magnitud, probabilidad]
+      properties:
+        componente: { type: string, enum: [agua, aire, suelo, flora, fauna, paisaje, social] }
+        descripcion: { type: string, minLength: 5, maxLength: 255 }
+        naturaleza: { type: string, enum: [positivo, negativo] }
+        magnitud: { type: integer, minimum: 1, maximum: 10 }
+        probabilidad: { type: integer, minimum: 1, maximum: 10 }
+        medidaManejo: { type: string }
+      example:
+        componente: suelo
+        descripcion: Erosión por remoción de maleza en pendientes fuertes
+        naturaleza: negativo
+        magnitud: 8
+        probabilidad: 9
+        medidaManejo: Siembra en curvas de nivel y trinchos de contención
+    ActividadEntrada:
+      type: object
+      required: [titulo, fechaLimite]
+      properties:
+        titulo: { type: string, minLength: 3, maxLength: 150 }
+        descripcion: { type: string }
+        fechaLimite: { type: string, format: date }
+        estado: { type: string, enum: [pendiente, en_progreso, completada], default: pendiente }
+        responsableId: { type: integer }
+      example:
+        titulo: Construcción del vivero temporal
+        descripcion: Vivero para 5.000 plántulas de guáimaro y ceiba
+        fechaLimite: '2026-12-15'
+        responsableId: 2
+    MonitoreoEntrada:
+      type: object
+      required: [parametro, valor, unidad, fechaMuestreo]
+      properties:
+        parametro: { type: string }
+        valor: { type: number }
+        unidad: { type: string }
+        limitePermisible: { type: number }
+        tipoLimite: { type: string, enum: [maximo, minimo], default: maximo }
+        puntoMuestreo: { type: string }
+        fechaMuestreo: { type: string, format: date, description: No puede ser futura }
+        observaciones: { type: string }
+      example:
+        parametro: Oxígeno disuelto
+        valor: 3.2
+        unidad: mg/L
+        limitePermisible: 4
+        tipoLimite: minimo
+        puntoMuestreo: Quebrada Mamatoco
+        fechaMuestreo: '2026-10-20'
