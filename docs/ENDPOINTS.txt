@@ -1,0 +1,65 @@
+ENDPOINTS - API Plataforma Digital Integral para la Gestión de Proyectos de Impacto Ambiental
+Evidencia GA7-220501096-AA5-EV04 · SENA ADSO 228118
+Aprendices: Roycer Cervantes y Sebastián Rodríguez
+
+URL base (local): http://localhost:3000/api
+Documentación interactiva (Swagger): http://localhost:3000/api/docs
+Autenticación: JWT. Enviar el encabezado  Authorization: Bearer <token>  (el token sale de /auth/login o /auth/registro).
+Roles: admin (todo), gestor (crea y maneja sus proyectos), consultor (solo consulta).
+Usuarios de prueba (npm run seed), contraseña Ambiental2026: admin@plataforma.com, roycer.cervantes@plataforma.com, sebastian.rodriguez@plataforma.com, consultor@plataforma.com
+
+
+=== SALUD ===
+01. GET    /api/salud                                    [público]   Verifica que la API y MySQL estén funcionando
+
+=== AUTENTICACIÓN ===
+02. POST   /api/auth/registro                            [público]   Registra un usuario nuevo y devuelve su token
+03. POST   /api/auth/login                               [público]   Inicia sesión (autenticación satisfactoria o error en la autenticación)
+04. GET    /api/auth/perfil                              [con token] Datos del usuario dueño del token
+
+=== USUARIOS ===
+05. GET    /api/usuarios                                 [con token] Lista los usuarios (solo admin)
+06. GET    /api/usuarios/{id}                            [con token] Consulta un usuario (admin o el mismo usuario)
+07. PUT    /api/usuarios/{id}                            [con token] Actualiza nombre, correo o contraseña (admin o el mismo usuario)
+08. DELETE /api/usuarios/{id}                            [con token] Desactiva un usuario (solo admin). No se borra para conservar el historial.
+09. PATCH  /api/usuarios/{id}/rol                        [con token] Cambia el rol de un usuario (solo admin)
+10. PATCH  /api/usuarios/{id}/activar                    [con token] Reactiva un usuario desactivado (solo admin)
+
+=== PROYECTOS ===
+11. GET    /api/proyectos                                [con token] Lista los proyectos con filtros y paginación
+12. POST   /api/proyectos                                [con token] Crea un proyecto (admin o gestor)
+13. GET    /api/proyectos/{id}                           [con token] Consulta un proyecto con sus impactos, actividades y monitoreos
+14. PUT    /api/proyectos/{id}                           [con token] Actualiza un proyecto (admin o responsable). Se envían solo los campos a cambiar.
+15. DELETE /api/proyectos/{id}                           [con token] Elimina el proyecto y todo lo que depende de él (admin o responsable)
+16. PATCH  /api/proyectos/{id}/estado                    [con token] Cambia el estado del proyecto
+
+=== IMPACTOS ===
+17. GET    /api/proyectos/{proyectoId}/impactos          [con token] Lista los impactos de un proyecto (ordenados por importancia)
+18. POST   /api/proyectos/{proyectoId}/impactos          [con token] Registra un impacto. La API calcula importancia (magnitud x probabilidad) y nivel.
+19. GET    /api/impactos/{id}                            [con token] Consulta un impacto
+20. PUT    /api/impactos/{id}                            [con token] Actualiza un impacto (si cambia magnitud o probabilidad se recalcula el nivel)
+21. DELETE /api/impactos/{id}                            [con token] Elimina un impacto
+
+=== ACTIVIDADES ===
+22. GET    /api/proyectos/{proyectoId}/actividades       [con token] Lista las actividades de un proyecto (incluye el campo calculado "vencida")
+23. POST   /api/proyectos/{proyectoId}/actividades       [con token] Crea una actividad del plan de manejo
+24. GET    /api/actividades/{id}                         [con token] Consulta una actividad
+25. PUT    /api/actividades/{id}                         [con token] Actualiza una actividad
+26. DELETE /api/actividades/{id}                         [con token] Elimina una actividad
+27. PATCH  /api/actividades/{id}/estado                  [con token] Cambia el estado de una actividad
+
+=== MONITOREOS ===
+28. GET    /api/proyectos/{proyectoId}/monitoreos        [con token] Lista los monitoreos de un proyecto
+29. POST   /api/proyectos/{proyectoId}/monitoreos        [con token] Registra una medición. La API calcula si cumple la norma.
+30. GET    /api/monitoreos/{id}                          [con token] Consulta un monitoreo
+31. PUT    /api/monitoreos/{id}                          [con token] Actualiza un monitoreo (se recalcula cumpleNorma)
+32. DELETE /api/monitoreos/{id}                          [con token] Elimina un monitoreo
+
+=== REPORTES ===
+33. GET    /api/reportes/dashboard                       [con token] Números generales de la plataforma para el Dashboard
+34. GET    /api/reportes/proyectos/{id}                  [con token] Resumen de un proyecto (impactos por nivel, % de avance, monitoreos)
+
+Total: 34 endpoints.
+
+Códigos de respuesta usados: 200 OK, 201 Creado, 400 Datos inválidos, 401 Sin token o token inválido, 403 Sin permiso / usuario desactivado, 404 No existe, 409 Correo repetido, 500 Error interno.
+Formato de respuesta: { ok, mensaje, datos } y en errores de validación { ok:false, mensaje, errores:[{campo, mensaje}] }.

@@ -1,0 +1,2711 @@
+{
+  "info": {
+    "name": "Plataforma Impacto Ambiental - API (AA5-EV04)",
+    "description": "Pruebas de los servicios web de la Plataforma Digital Integral para la Gestión de Proyectos de Impacto Ambiental.\nSENA ADSO 228118 - Evidencia GA7-220501096-AA5-EV04.\nAprendices: Roycer Cervantes y Sebastián Rodríguez.\n\nAntes de correr: API encendida (npm run dev) y datos de prueba cargados (npm run seed). Ejecutar la colección completa en orden con el Collection Runner.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00 · Salud",
+      "description": "Verifica que la API está en línea y conectada a MySQL.",
+      "item": [
+        {
+          "name": "01. Estado de la API",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));",
+                  "pm.test('La base de datos está conectada', () => pm.expect(json.baseDatos).to.eql('conectada'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/salud",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "salud"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 · Autenticación",
+      "description": "Registro, inicio de sesión (JWT) y perfil.",
+      "item": [
+        {
+          "name": "02. Registro de usuario nuevo",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('correoNuevo', 'laura.mendoza.' + Date.now() + '@correo.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));",
+                  "pm.test('No devuelve la contraseña', () => pm.expect(json.datos.usuario).to.not.have.property('password_hash'));",
+                  "if (json.datos) { pm.collectionVariables.set('tokenLaura', json.datos.token); }",
+                  "if (json.datos) { pm.collectionVariables.set('idLaura', json.datos.usuario.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Laura Mendoza\",\n  \"correo\": \"{{correoNuevo}}\",\n  \"password\": \"Manglar2026\",\n  \"rol\": \"gestor\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/registro",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "registro"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 201."
+          },
+          "response": []
+        },
+        {
+          "name": "03. Registro con correo repetido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Otra Persona\",\n  \"correo\": \"admin@plataforma.com\",\n  \"password\": \"Prueba2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/registro",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "registro"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 409."
+          },
+          "response": []
+        },
+        {
+          "name": "04. Registro con datos inválidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));",
+                  "pm.test('Devuelve la lista de errores por campo', () => pm.expect(json.errores).to.be.an('array').that.is.not.empty);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Al\",\n  \"correo\": \"correo-malo\",\n  \"password\": \"123\",\n  \"rol\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/registro",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "registro"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 400."
+          },
+          "response": []
+        },
+        {
+          "name": "05. Login administrador",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));",
+                  "pm.test('Mensaje de autenticación satisfactoria', () => pm.expect(json.mensaje).to.eql('Autenticación satisfactoria'));",
+                  "pm.test('Entrega un token JWT', () => pm.expect(json.datos.token.split('.').length).to.eql(3));",
+                  "if (json.datos) { pm.collectionVariables.set('tokenAdmin', json.datos.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"admin@plataforma.com\",\n  \"password\": \"Ambiental2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "06. Login con contraseña incorrecta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"admin@plataforma.com\",\n  \"password\": \"claveEquivocada1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 401."
+          },
+          "response": []
+        },
+        {
+          "name": "07. Login gestor (Roycer)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));",
+                  "if (json.datos) { pm.collectionVariables.set('tokenRoycer', json.datos.token); }",
+                  "if (json.datos) { pm.collectionVariables.set('idRoycer', json.datos.usuario.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"roycer.cervantes@plataforma.com\",\n  \"password\": \"Ambiental2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "08. Login gestor (Sebastián)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));",
+                  "if (json.datos) { pm.collectionVariables.set('tokenSebastian', json.datos.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"sebastian.rodriguez@plataforma.com\",\n  \"password\": \"Ambiental2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "09. Login consultor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));",
+                  "if (json.datos) { pm.collectionVariables.set('tokenConsultor', json.datos.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"consultor@plataforma.com\",\n  \"password\": \"Ambiental2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "10. Perfil del usuario autenticado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/perfil",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "perfil"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "11. Perfil sin token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/perfil",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "perfil"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 401."
+          },
+          "response": []
+        },
+        {
+          "name": "12. Perfil con token inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer abc.def.ghi"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/perfil",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "perfil"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 401."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 · Usuarios",
+      "description": "Administración de usuarios y permisos por rol.",
+      "item": [
+        {
+          "name": "13. Listar usuarios (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios?limite=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ],
+              "query": [
+                {
+                  "key": "limite",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "14. Listar usuarios sin permiso (consultor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 403', () => pm.response.to.have.status(403));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 403."
+          },
+          "response": []
+        },
+        {
+          "name": "15. Obtener mi usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenLaura}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{idLaura}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{idLaura}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "16. Obtener usuario ajeno (consultor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 403', () => pm.response.to.have.status(403));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{idLaura}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{idLaura}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 403."
+          },
+          "response": []
+        },
+        {
+          "name": "17. Actualizar mi nombre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenLaura}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Laura Mendoza Pérez\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{idLaura}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{idLaura}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "18. Cambiar rol (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rol\": \"consultor\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{idLaura}}/rol",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{idLaura}}",
+                "rol"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 · Proyectos",
+      "description": "CRUD de proyectos ambientales con filtros y permisos.",
+      "item": [
+        {
+          "name": "19. Listar proyectos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));",
+                  "pm.test('Devuelve una lista de proyectos', () => pm.expect(json.datos).to.be.an('array').that.is.not.empty);",
+                  "if (json.datos) { pm.collectionVariables.set('idPrimerProyecto', json.datos[0].id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos?limite=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos"
+              ],
+              "query": [
+                {
+                  "key": "limite",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "20. Filtrar proyectos por estado y texto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos?estado=ejecucion&buscar=manglar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "ejecucion"
+                },
+                {
+                  "key": "buscar",
+                  "value": "manglar"
+                }
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "21. Filtro con estado inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos?estado=terminado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos"
+              ],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "terminado"
+                }
+              ]
+            },
+            "description": "Resultado esperado: HTTP 400."
+          },
+          "response": []
+        },
+        {
+          "name": "22. Crear proyecto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));",
+                  "pm.test('Genera el código PIA-AAAA-NNNN', () => pm.expect(json.datos.codigo).to.match(/^PIA-\\d{4}-\\d{4}$/));",
+                  "if (json.datos) { pm.collectionVariables.set('idProyecto', json.datos.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Reforestación de la cuenca alta del río Gaira\",\n  \"descripcion\": \"Siembra de especies nativas en zonas de recarga hídrica afectadas por incendios.\",\n  \"tipo\": \"restauracion\",\n  \"municipio\": \"Santa Marta\",\n  \"departamento\": \"Magdalena\",\n  \"latitud\": 11.112,\n  \"longitud\": -74.071,\n  \"fechaInicio\": \"2026-11-01\",\n  \"fechaFin\": \"2027-10-31\",\n  \"presupuesto\": 120000000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 201."
+          },
+          "response": []
+        },
+        {
+          "name": "23. Crear proyecto con datos inválidos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Reforestación de la cuenca alta del río Gaira\",\n  \"descripcion\": \"Siembra de especies nativas en zonas de recarga hídrica afectadas por incendios.\",\n  \"tipo\": \"mineria\",\n  \"municipio\": \"Santa Marta\",\n  \"departamento\": \"Magdalena\",\n  \"latitud\": 200,\n  \"longitud\": -74.071,\n  \"fechaInicio\": \"2026-11-01\",\n  \"fechaFin\": \"2026-01-01\",\n  \"presupuesto\": 120000000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 400."
+          },
+          "response": []
+        },
+        {
+          "name": "24. Crear proyecto sin permiso (consultor)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 403', () => pm.response.to.have.status(403));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Reforestación de la cuenca alta del río Gaira\",\n  \"descripcion\": \"Siembra de especies nativas en zonas de recarga hídrica afectadas por incendios.\",\n  \"tipo\": \"restauracion\",\n  \"municipio\": \"Santa Marta\",\n  \"departamento\": \"Magdalena\",\n  \"latitud\": 11.112,\n  \"longitud\": -74.071,\n  \"fechaInicio\": \"2026-11-01\",\n  \"fechaFin\": \"2027-10-31\",\n  \"presupuesto\": 120000000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 403."
+          },
+          "response": []
+        },
+        {
+          "name": "25. Obtener proyecto por id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idPrimerProyecto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idPrimerProyecto}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "26. Obtener proyecto con id inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "abc"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 400."
+          },
+          "response": []
+        },
+        {
+          "name": "27. Actualizar proyecto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"presupuesto\": 135000000,\n  \"descripcion\": \"Siembra de 15.000 árboles nativos en zonas de recarga hídrica.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "28. Actualizar proyecto ajeno",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 403', () => pm.response.to.have.status(403));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenSebastian}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"presupuesto\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 403."
+          },
+          "response": []
+        },
+        {
+          "name": "29. Cambiar estado del proyecto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"ejecucion\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}",
+                "estado"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 · Impactos ambientales",
+      "description": "Identificación de impactos con cálculo de importancia y nivel.",
+      "item": [
+        {
+          "name": "30. Crear impacto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));",
+                  "pm.test('Calcula la importancia (8 x 9 = 72)', () => pm.expect(Number(json.datos.importancia)).to.eql(72));",
+                  "if (json.datos) { pm.collectionVariables.set('idImpacto', json.datos.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"componente\": \"suelo\",\n  \"descripcion\": \"Erosión por remoción de maleza en pendientes fuertes\",\n  \"naturaleza\": \"negativo\",\n  \"magnitud\": 8,\n  \"probabilidad\": 9,\n  \"medidaManejo\": \"Siembra en curvas de nivel y trinchos de contención\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}/impactos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}",
+                "impactos"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 201."
+          },
+          "response": []
+        },
+        {
+          "name": "31. Crear impacto inválido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"componente\": \"ruido\",\n  \"descripcion\": \"x\",\n  \"naturaleza\": \"neutro\",\n  \"magnitud\": 15,\n  \"probabilidad\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}/impactos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}",
+                "impactos"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 400."
+          },
+          "response": []
+        },
+        {
+          "name": "32. Listar impactos críticos del proyecto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}/impactos?nivel=critico",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}",
+                "impactos"
+              ],
+              "query": [
+                {
+                  "key": "nivel",
+                  "value": "critico"
+                }
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "33. Obtener impacto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/impactos/{{idImpacto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "impactos",
+                "{{idImpacto}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "34. Actualizar impacto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"magnitud\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/impactos/{{idImpacto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "impactos",
+                "{{idImpacto}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 · Actividades",
+      "description": "Tareas del plan de manejo ambiental.",
+      "item": [
+        {
+          "name": "35. Crear actividad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));",
+                  "if (json.datos) { pm.collectionVariables.set('idActividad', json.datos.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Construcción del vivero temporal\",\n  \"descripcion\": \"Vivero para 5.000 plántulas de guáimaro y ceiba\",\n  \"fechaLimite\": \"2026-12-15\",\n  \"responsableId\": {{idRoycer}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}/actividades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}",
+                "actividades"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 201."
+          },
+          "response": []
+        },
+        {
+          "name": "36. Crear actividad con fecha pasada",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Tarea con fecha mala\",\n  \"fechaLimite\": \"2026-01-10\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}/actividades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}",
+                "actividades"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 400."
+          },
+          "response": []
+        },
+        {
+          "name": "37. Listar actividades",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}/actividades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}",
+                "actividades"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "38. Obtener actividad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/actividades/{{idActividad}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actividades",
+                "{{idActividad}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "39. Actualizar actividad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fechaLimite\": \"2026-12-20\",\n  \"estado\": \"en_progreso\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/actividades/{{idActividad}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actividades",
+                "{{idActividad}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "40. Cambiar estado de actividad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"completada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/actividades/{{idActividad}}/estado",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actividades",
+                "{{idActividad}}",
+                "estado"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 · Monitoreos",
+      "description": "Mediciones ambientales con evaluación automática de la norma.",
+      "item": [
+        {
+          "name": "41. Crear monitoreo (oxígeno disuelto)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));",
+                  "pm.test('Detecta que NO cumple la norma (3.2 < 4)', () => pm.expect(Boolean(json.datos.cumpleNorma)).to.eql(false));",
+                  "if (json.datos) { pm.collectionVariables.set('idMonitoreo', json.datos.id); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parametro\": \"Oxígeno disuelto\",\n  \"valor\": 3.2,\n  \"unidad\": \"mg/L\",\n  \"limitePermisible\": 4,\n  \"tipoLimite\": \"minimo\",\n  \"puntoMuestreo\": \"Quebrada Mamatoco\",\n  \"fechaMuestreo\": \"2026-10-20\",\n  \"observaciones\": \"Muestreo después de lluvias fuertes\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}/monitoreos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}",
+                "monitoreos"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 201."
+          },
+          "response": []
+        },
+        {
+          "name": "42. Crear monitoreo con fecha futura",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parametro\": \"pH\",\n  \"valor\": 7,\n  \"unidad\": \"unidades\",\n  \"fechaMuestreo\": \"2030-01-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}/monitoreos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}",
+                "monitoreos"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 400."
+          },
+          "response": []
+        },
+        {
+          "name": "43. Listar monitoreos que no cumplen",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}/monitoreos?cumpleNorma=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}",
+                "monitoreos"
+              ],
+              "query": [
+                {
+                  "key": "cumpleNorma",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "44. Obtener monitoreo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/monitoreos/{{idMonitoreo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "monitoreos",
+                "{{idMonitoreo}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "45. Actualizar monitoreo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));",
+                  "pm.test('Ahora cumple la norma (5.6 >= 4)', () => pm.expect(Boolean(json.datos.cumpleNorma)).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": 5.6,\n  \"observaciones\": \"Segundo muestreo, ya en norma\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/monitoreos/{{idMonitoreo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "monitoreos",
+                "{{idMonitoreo}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 · Reportes",
+      "description": "Datos para el dashboard del front.",
+      "item": [
+        {
+          "name": "46. Dashboard general",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reportes/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes",
+                "dashboard"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "47. Resumen de un proyecto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenConsultor}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reportes/proyectos/{{idProyecto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes",
+                "proyectos",
+                "{{idProyecto}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08 · Eliminaciones",
+      "description": "Borrado de registros y verificación de que ya no existen.",
+      "item": [
+        {
+          "name": "48. Eliminar monitoreo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/monitoreos/{{idMonitoreo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "monitoreos",
+                "{{idMonitoreo}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "49. Eliminar actividad",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/actividades/{{idActividad}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actividades",
+                "{{idActividad}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "50. Eliminar impacto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/impactos/{{idImpacto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "impactos",
+                "{{idImpacto}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "51. Consultar impacto eliminado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/impactos/{{idImpacto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "impactos",
+                "{{idImpacto}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 404."
+          },
+          "response": []
+        },
+        {
+          "name": "52. Eliminar proyecto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "53. Consultar proyecto eliminado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenRoycer}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/proyectos/{{idProyecto}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "proyectos",
+                "{{idProyecto}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 404."
+          },
+          "response": []
+        },
+        {
+          "name": "54. Desactivar usuario (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{idLaura}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{idLaura}}"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        },
+        {
+          "name": "55. Login de usuario desactivado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 403', () => pm.response.to.have.status(403));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"correo\": \"{{correoNuevo}}\",\n  \"password\": \"Manglar2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 403."
+          },
+          "response": []
+        },
+        {
+          "name": "56. Reactivar usuario (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = true', () => pm.expect(json.ok).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{tokenAdmin}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/{{idLaura}}/activar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{idLaura}}",
+                "activar"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 200."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "09 · Errores generales",
+      "description": "Rutas inexistentes y JSON mal formado.",
+      "item": [
+        {
+          "name": "57. Ruta que no existe",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/esta-ruta-no-existe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "esta-ruta-no-existe"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 404."
+          },
+          "response": []
+        },
+        {
+          "name": "58. JSON mal formado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Código de estado 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Responde en menos de 1500 ms', () => pm.expect(pm.response.responseTime).to.be.below(1500));",
+                  "pm.test('La respuesta trae ok = false', () => pm.expect(json.ok).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"correo\": \"admin@plataforma.com\",}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Resultado esperado: HTTP 400."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "correoNuevo",
+      "value": ""
+    },
+    {
+      "key": "tokenAdmin",
+      "value": ""
+    },
+    {
+      "key": "tokenRoycer",
+      "value": ""
+    },
+    {
+      "key": "tokenSebastian",
+      "value": ""
+    },
+    {
+      "key": "tokenConsultor",
+      "value": ""
+    },
+    {
+      "key": "tokenLaura",
+      "value": ""
+    },
+    {
+      "key": "idLaura",
+      "value": ""
+    },
+    {
+      "key": "idRoycer",
+      "value": ""
+    },
+    {
+      "key": "idPrimerProyecto",
+      "value": ""
+    },
+    {
+      "key": "idProyecto",
+      "value": ""
+    },
+    {
+      "key": "idImpacto",
+      "value": ""
+    },
+    {
+      "key": "idActividad",
+      "value": ""
+    },
+    {
+      "key": "idMonitoreo",
+      "value": ""
+    }
+  ]
+}
