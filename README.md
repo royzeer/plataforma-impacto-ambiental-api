@@ -1,5 +1,15 @@
 # API – Plataforma Digital Integral para la Gestión de Proyectos de Impacto Ambiental
 
+[![Pruebas](https://github.com/royzeer/plataforma-impacto-ambiental-api/actions/workflows/pruebas.yml/badge.svg)](https://github.com/royzeer/plataforma-impacto-ambiental-api/actions/workflows/pruebas.yml)
+![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-4-000000?logo=express&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)
+![JWT](https://img.shields.io/badge/Auth-JWT-000000?logo=jsonwebtokens&logoColor=white)
+![OpenAPI](https://img.shields.io/badge/Docs-OpenAPI%203-85EA2D?logo=swagger&logoColor=black)
+![Licencia](https://img.shields.io/badge/licencia-MIT-blue)
+
+> 🇬🇧 *English summary at the [end of this file](#english-summary).*
+
 Servicios web (API REST) de nuestro proyecto formativo del SENA.
 Con esta API el front en React puede registrar usuarios, iniciar sesión, crear proyectos ambientales, identificar sus impactos, planear actividades de manejo, registrar monitoreos (pH, oxígeno disuelto, DBO5...) y ver reportes para el dashboard.
 
@@ -62,6 +72,18 @@ npm run probar
 ```
 
 Ejecuta 58 peticiones (casos buenos y casos de error) y dice cuáles pasaron.
+
+### Pruebas automáticas (Jest + Supertest)
+
+```bash
+npm test                # corre las pruebas unitarias y de integración
+npm run test:cobertura  # igual, pero con reporte de cobertura
+```
+
+- `tests/unit/`: matriz de impacto (importancia y nivel), cumplimiento de norma, validador propio y paginación.
+- `tests/integracion/`: la app Express completa con Supertest: bienvenida, Swagger, 404, JSON mal escrito y protección con JWT (sin token, token falso y token vencido).
+
+Estas pruebas **no necesitan MySQL**, así que corren en cualquier PC y en GitHub Actions cada vez que se sube código (Node 18, 20 y 22).
 
 ## 3. Estructura del proyecto
 
@@ -159,3 +181,31 @@ Seguimos lo definido en la evidencia AA1-EV02:
 - **Sebastián Rodríguez**
 
 SENA – Tecnología en Análisis y Desarrollo de Software – 2026
+
+---
+
+## English summary
+
+REST API for an **environmental impact project management platform**, built as a training project for the SENA Software Analysis and Development program (Colombia).
+
+**What it does**
+- User registration and login with **JWT** and **bcrypt**, plus role-based access control (`admin`, `gestor`, `consultor`).
+- Full CRUD for environmental projects, with filters, pagination and owner-based permissions.
+- Environmental impact assessment: the API computes impact **importance = magnitude × probability** (1–100) and classifies it as low, moderate, high or critical.
+- Management activities and **environmental monitoring** (pH, dissolved oxygen, BOD5…) with automatic compliance checks against maximum or minimum regulatory limits.
+- Dashboard reports aggregated per project.
+
+**Tech stack:** Node.js · Express · MySQL 8 (mysql2, connection pool, parameterized queries) · JWT · bcrypt · OpenAPI 3 / Swagger UI · Jest · Supertest · GitHub Actions.
+
+**Architecture:** layered design (routes → controllers → models → MySQL), centralized error handling and a single response format (`{ ok, mensaje, datos }`).
+
+**Run it locally**
+
+```bash
+npm install
+cp .env.example .env   # set your MySQL credentials
+mysql -u root -p < database/schema.sql
+npm run seed
+npm run dev            # http://localhost:3000/api/docs
+npm test               # automated tests, no database required
+```

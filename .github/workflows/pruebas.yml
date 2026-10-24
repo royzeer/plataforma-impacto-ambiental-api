@@ -1,0 +1,23 @@
+# Corre las pruebas automáticas cada vez que se sube código a GitHub.
+# Las pruebas no necesitan MySQL, así que basta con Node.
+name: Pruebas
+
+on:
+  push:
+    branches: [main, mejoras-perfil]
+  pull_request:
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm test

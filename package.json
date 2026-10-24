@@ -7,7 +7,9 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "seed": "node database/seed.js",
-    "probar": "node pruebas/probarApi.js"
+    "probar": "node pruebas/probarApi.js",
+    "test": "jest",
+    "test:cobertura": "jest --coverage"
   },
   "keywords": [
     "api",
@@ -31,6 +33,18 @@
     "yaml": "^2.6.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.9",
+    "supertest": "^7.3.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/tests"
+    ],
+    "collectCoverageFrom": [
+      "src/utils/**/*.js",
+      "src/middlewares/**/*.js"
+    ]
   }
 }
