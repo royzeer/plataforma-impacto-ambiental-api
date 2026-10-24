@@ -8,7 +8,7 @@
 ![OpenAPI](https://img.shields.io/badge/Docs-OpenAPI%203-85EA2D?logo=swagger&logoColor=black)
 ![Licencia](https://img.shields.io/badge/licencia-MIT-blue)
 
-> 🇬🇧 *English summary at the [end of this file](#english-summary).*
+> *English summary at the [end of this file](#english-summary).*
 
 Servicios web (API REST) de nuestro proyecto formativo del SENA.
 Con esta API el front en React puede registrar usuarios, iniciar sesión, crear proyectos ambientales, identificar sus impactos, planear actividades de manejo, registrar monitoreos (pH, oxígeno disuelto, DBO5...) y ver reportes para el dashboard.
